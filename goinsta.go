@@ -3,6 +3,7 @@ package goinsta
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -347,27 +348,27 @@ func (inst *Instagram) sendAdID() error {
 func (inst *Instagram) Login() error {
 	err := inst.readMsisdnHeader()
 	if err != nil {
-		return err
+		return fmt.Errorf("readMsisdnHeader: %w", err)
 	}
 
 	err = inst.syncFeatures()
 	if err != nil {
-		return err
+		return fmt.Errorf("syncFeatures: %w", err)
 	}
 
 	err = inst.zrToken()
 	if err != nil {
-		return err
+		return fmt.Errorf("zrToken: %w", err)
 	}
 
 	err = inst.sendAdID()
 	if err != nil {
-		return err
+		return fmt.Errorf("sendAdID: %w", err)
 	}
 
 	err = inst.contactPrefill()
 	if err != nil {
-		return err
+		return fmt.Errorf("contactPrefill: %w", err)
 	}
 
 	result, err := json.Marshal(
@@ -384,7 +385,7 @@ func (inst *Instagram) Login() error {
 		},
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("json.Marshal: %w", err)
 	}
 	body, err := inst.sendRequest(
 		&reqOptions{
@@ -395,7 +396,7 @@ func (inst *Instagram) Login() error {
 		},
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("sendRequest: %w", err)
 	}
 	inst.pass = ""
 
@@ -403,7 +404,7 @@ func (inst *Instagram) Login() error {
 	res := accountResp{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return err
+		return fmt.Errorf("Unmarshal: %w ((%s))", err, string(body))
 	}
 
 	inst.Account = &res.Account
